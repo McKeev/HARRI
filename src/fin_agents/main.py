@@ -1,18 +1,19 @@
 import fin_db as fdb
-from .first_attempt import agent, State
+from .parser import ParseDeps, parser_agent
 
 
 def run():
     logger = fdb.setup_logger('main')
-    fdb.open_session('fin_db_read')
-    state = State()
-    result = agent.run_sync(
-        user_prompt='What were the returns for AAPL in 2025?',
-        deps=state,
+    deps = ParseDeps(
+        user='Cedric',
+        possible_portfolios=['LOUIS.PF', 'CEDRIC.PF', 'JOHN.PF'],
     )
-    logger.info('Agent run complete')
-    print(result.output)
-    print(state.data)
+
+    result = parser_agent.run_sync(
+        deps=deps,
+        user_prompt="hows tsmc been doing since last year?"
+    )
+    logger.info('Parsed output: %s', result.output)
 
 
 if __name__ == '__main__':

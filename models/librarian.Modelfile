@@ -1,6 +1,0 @@
-# Base model
-FROM qwen2.5:3b
-
-# Performance & Context
-PARAMETER temperature 0
-PARAMETER top_p 0.1

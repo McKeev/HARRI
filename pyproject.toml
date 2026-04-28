@@ -26,3 +26,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 agent = "fin_agents.main:run"
+
+[dependency-groups]
+optional = [
+    "logfire (>=4.32.1,<5.0.0)"
+]
