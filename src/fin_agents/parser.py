@@ -98,7 +98,9 @@ def validate_output(
 ) -> ParsedOutput:
     errors = []
 
-    # Fix N
+    # Uppercase all assets and portfolios
+    output.assets = [asset.upper() for asset in (output.assets or [])]
+    output.portfolios = [pf.upper() for pf in (output.portfolios or [])]
 
     # Validate that portfolios mentioned in output are in possible_portfolios
     for pf in (output.portfolios or []):

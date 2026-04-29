@@ -1,0 +1,26 @@
+{
+    "My portfolio performance YTD": {
+        "assets":[],
+        "portfolios":["CEDRIC.PF"],
+        "start_date":"2026-01-01",
+        "end_date":"2026-04-08"
+    },
+    "How did snowflake do in 2024?": {
+        "assets": ["SNOWFLAKE"],
+        "portfolios": [],
+        "start_date": "2024-01-01",
+        "end_date": "2024-12-31"
+    },
+    "How is my portfolio holding up compared to the SP500 this year ?": {
+        "assets": ["SP500"],
+        "portfolios": ["CEDRIC.PF"],
+        "start_date": "2026-01-01",
+        "end_date": "2026-04-08"
+    },
+    "What has AAPL been doing recently?": {
+        "assets": ["AAPL"],
+        "portfolios": [],
+        "start_date": "",
+        "end_date": ""
+    }
+}

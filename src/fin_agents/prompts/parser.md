@@ -11,8 +11,9 @@ You only respond in the specfied JSON format. No filler text.
 - Last year: {{ year - 1 }}-01-01 - {{ year - 1 }}-12-31
 
 - User serviced: {{ user }}
-- "market" is an `assets`
+- "market" is an `assets`, but should not overwrite user-provided indices such as SP500
 - "since date" means from date until {{ today }}
+- "pf" is an abbreviation for portfolio
 
 # Output
 
@@ -32,6 +33,7 @@ Produce only JSON object matching `ParsedOutput`:
 - If data is point in time: `start_date` = `end_date`.
 - Portfolios should be one of {{ possible_portfolios }}.
 - Infer portfolio through language (ex: "my portfolio" is "{{ user }}.PF)" and ouput in `portfolios`.
+- Infer timeframe through language (ex: "this year", "ytd", "last year")
 - Do not guess dates. If timeframe is unclear, return `start_date` and `end_date` as empty strings.
     - Unclear timeframes can include phrasing such as: "recently", "lately"
 
@@ -40,7 +42,7 @@ Produce only JSON object matching `ParsedOutput`:
 ## Example 1
 
 - **User:**
-> How did John do in the last quarter of 2020 ?
+> How did John do in 2020 ?
 
 - **Assistant:**
 ```json

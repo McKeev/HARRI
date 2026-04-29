@@ -31,3 +31,6 @@ agent = "fin_agents.main:run"
 optional = [
     "logfire (>=4.32.1,<5.0.0)"
 ]
+dev = [
+    "pytest (>=9.0.3,<10.0.0)"
+]
