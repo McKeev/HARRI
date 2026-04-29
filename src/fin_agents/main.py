@@ -1,13 +1,4 @@
 import sys
-
-"""
-try:
-    import logfire
-    logfire.configure()
-    logfire.instrument_pydantic_ai()
-except ImportError:
-    pass
-"""
 from .parser import ParseDeps, parser_agent
 
 

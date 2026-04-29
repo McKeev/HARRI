@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from pydantic_ai import Agent, RunContext, ModelRetry
 from pydantic_ai.settings import ModelSettings
 from pydantic_ai.models.openai import OpenAIChatModel
-from pydantic_ai.providers.ollama import OllamaProvider
+from pydantic_ai.providers.openai import OpenAIProvider
 from jinja2 import Template
 # Constants
 FILE_DIR = Path(__file__).parent
@@ -22,8 +22,9 @@ logger = logging.getLogger(__name__)
 # -----------------------------------------------------------------------------
 # =============================== AGENT SETUP =================================
 # -----------------------------------------------------------------------------
-provider = OllamaProvider(base_url="http://localhost:11434/v1")
-model = OpenAIChatModel('qwen2.5:1.5b', provider=provider)
+# Works with env var `OPENAI_API_KEY` by default
+provider = OpenAIProvider()
+model = OpenAIChatModel('gpt-5.4-nano', provider=provider)
 
 
 @dataclass
@@ -71,8 +72,6 @@ def build_prompt(ctx: RunContext[ParseDeps]) -> str:
     vars = {
         'today': today.strftime('%Y-%m-%d'),
         'year': today.year,
-        'M3': (today - dt.timedelta(days=91)).strftime('%Y-%m-%d'),
-        'M6': (today - dt.timedelta(days=182)).strftime('%Y-%m-%d'),
         'yesterday': (today - dt.timedelta(days=1)).strftime('%Y-%m-%d'),
         'user': ctx.deps.user.upper(),
         'possible_portfolios': ctx.deps.possible_portfolios,
