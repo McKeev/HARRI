@@ -13,12 +13,6 @@ from pydantic_ai.settings import ModelSettings
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.ollama import OllamaProvider
 from jinja2 import Template
-try:
-    import logfire
-    logfire.configure()
-    logfire.instrument_pydantic_ai()
-except ImportError:
-    pass
 # Constants
 FILE_DIR = Path(__file__).parent
 # Setup logger

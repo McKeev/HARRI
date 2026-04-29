@@ -1,9 +1,21 @@
-import fin_db as fdb
+import sys
+
+"""
+try:
+    import logfire
+    logfire.configure()
+    logfire.instrument_pydantic_ai()
+except ImportError:
+    pass
+"""
 from .parser import ParseDeps, parser_agent
 
 
 def run():
-    logger = fdb.setup_logger('main')
+    """
+    Runs the parser agent with a user prompt taken from command line arguments.
+    """
+    user_prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else None
     deps = ParseDeps(
         user='Cedric',
         possible_portfolios=['LOUIS.PF', 'CEDRIC.PF', 'JOHN.PF'],
@@ -11,9 +23,10 @@ def run():
 
     result = parser_agent.run_sync(
         deps=deps,
-        user_prompt="hows tsmc been doing since last year?"
+        user_prompt=user_prompt
     )
-    logger.info('Parsed output: %s', result.output)
+
+    return result.output
 
 
 if __name__ == '__main__':
