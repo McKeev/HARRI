@@ -66,7 +66,7 @@ parser_agent = Agent(
 # System prompt
 @parser_agent.system_prompt
 def build_prompt(ctx: RunContext[ParseDeps]) -> str:
-    prompt_text = (FILE_DIR / 'prompts' / 'parser.md').read_text()
+    prompt_text = (FILE_DIR / 'parser.md').read_text()
     today = dt.datetime.strptime(ctx.deps.current_date, '%Y-%m-%d').date()
 
     vars = {
@@ -86,7 +86,7 @@ def build_prompt(ctx: RunContext[ParseDeps]) -> str:
 # Ouptut validation can catch errors and trigger a retry with a helpful message
 @parser_agent.output_validator
 def validate_output(
-    deps: RunContext[ParseDeps],
+    ctx: RunContext[ParseDeps],
     output: ParsedOutput
 ) -> ParsedOutput:
     errors = []
@@ -97,10 +97,10 @@ def validate_output(
 
     # Validate that portfolios mentioned in output are in possible_portfolios
     for pf in (output.portfolios or []):
-        if pf not in deps.deps.possible_portfolios:
+        if pf not in ctx.deps.possible_portfolios:
             errors.append(
                 f"- Invalid portfolio mentioned: {pf}. Must be one of "
-                f"{deps.deps.possible_portfolios}"
+                f"{ctx.deps.possible_portfolios}"
             )
 
     # Check that start_date is not after end_date
@@ -113,7 +113,7 @@ def validate_output(
     # Move any assets that are actually portfolio names
     # (common model error we can fix ourselves)
     for asset in (output.assets or []):
-        if asset in deps.deps.possible_portfolios:
+        if asset in ctx.deps.possible_portfolios:
             output.assets.remove(asset)
             if asset not in (output.portfolios or []):
                 output.portfolios.append(asset)

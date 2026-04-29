@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from fin_agents.parser import ParseDeps, ParsedOutput, parser_agent
+from harri.agents import ParseDeps, ParsedOutput, parser_agent
 
 FILE_DIR = Path(__file__).parent
 GREEN = '\033[92m'

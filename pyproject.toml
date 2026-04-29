@@ -1,5 +1,5 @@
 [project]
-name = "fin-agents"
+name = "harri"
 version = "0.1.0"
 description = ""
 authors = [
@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "fin_agents", from = "src"}]
+packages = [{include = "harri", from = "src"}]
 
 [tool.poetry.dependencies]
 fin-db = {develop = true}
@@ -25,7 +25,7 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-agent = "fin_agents.main:run"
+harri = "harri.main:run"
 
 [dependency-groups]
 optional = [

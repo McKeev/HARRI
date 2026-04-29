@@ -1,5 +1,5 @@
 import sys
-from .parser import ParseDeps, parser_agent
+from .agents import ParseDeps, parser_agent
 
 
 def run():
