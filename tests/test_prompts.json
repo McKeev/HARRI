@@ -1,122 +1,122 @@
 {
-    "My portfolio performance YTD": {
-        "assets": [],
-        "portfolios": ["CEDRIC.PF"],
-        "start_date": "2026-01-01",
-        "end_date": "2026-04-08"
-    },
-    "How did snowflake do in 2024?": {
-        "assets": ["SNOWFLAKE"],
-        "portfolios": [],
-        "start_date": "2024-01-01",
-        "end_date": "2024-12-31"
-    },
-    "How is my portfolio holding up compared to the SP500 this year ?": {
-        "assets": ["SP500"],
-        "portfolios": ["CEDRIC.PF"],
-        "start_date": "2026-01-01",
-        "end_date": "2026-04-08"
-    },
-    "What has AAPL been doing recently?": {
-        "assets": ["AAPL"],
-        "portfolios": [],
-        "start_date": "",
-        "end_date": ""
-    },
-    "Compare Louis' pf to the market since 2026-02-01": {
-        "assets": ["MARKET"],
-        "portfolios": ["LOUIS.PF"],
-        "start_date": "2026-02-01",
-        "end_date": "2026-04-08"
-    },
-    "How did Apple and microSoft do last year?": {
-        "assets": ["APPLE", "MICROSOFT"],
-        "portfolios": [],
-        "start_date": "2025-01-01",
-        "end_date": "2025-12-31"
-    },
-    "Performance of John's portfolio yesterday": {
-        "assets": [],
-        "portfolios": ["JOHN.PF"],
-        "start_date": "2026-04-07",
-        "end_date": "2026-04-07"
-    },
-    "Did tesla beat john pf and louis.pf in 2023?": {
-        "assets": ["TESLA"],
-        "portfolios": ["JOHN.PF", "LOUIS.PF"],
-        "start_date": "2023-01-01",
-        "end_date": "2023-12-31"
-    },
-    "What is the market looking like lately?": {
-        "assets": ["MARKET"],
-        "portfolios": [],
-        "start_date": "",
-        "end_date": ""
-    },
-    "Compare my pf to Nasdaq and Russell 2000": {
-        "assets": ["NASDAQ", "RUSSELL 2000"],
-        "portfolios": ["CEDRIC.PF"],
-        "start_date": "",
-        "end_date": ""
-    },
-    "NVDA price on 2025-11-15": {
-        "assets": ["NVDA"],
-        "portfolios": [],
-        "start_date": "2025-11-15",
-        "end_date": "2025-11-15"
-    },
-    "how did the market do since 2025-12-01?": {
-        "assets": ["MARKET"],
-        "portfolios": [],
-        "start_date": "2025-12-01",
-        "end_date": "2026-04-08"
-    },
-    "bitcoin and ethereum ytd": {
-        "assets": ["BITCOIN", "ETHEREUM"],
-        "portfolios": [],
-        "start_date": "2026-01-01",
-        "end_date": "2026-04-08"
-    },
-    "my portfolio last year": {
-        "assets": [],
-        "portfolios": ["CEDRIC.PF"],
-        "start_date": "2025-01-01",
-        "end_date": "2025-12-31"
-    },
-    "Did GOOGL go up?": {
-        "assets": ["GOOGL"],
-        "portfolios": [],
-        "start_date": "",
-        "end_date": ""
-    },
-    "John pf versus CEDRIC.PF this year": {
-        "assets": [],
-        "portfolios": ["JOHN.PF", "CEDRIC.PF"],
-        "start_date": "2026-01-01",
-        "end_date": "2026-04-08"
-    },
-    "What did AMZN close at yesterday": {
-        "assets": ["AMZN"],
-        "portfolios": [],
-        "start_date": "2026-04-07",
-        "end_date": "2026-04-07"
-    },
-    "meta and Nflx since 2026-01-15": {
-        "assets": ["META", "NFLX"],
-        "portfolios": [],
-        "start_date": "2026-01-15",
-        "end_date": "2026-04-08"
-    },
-    "how did Louis's pf perform in 2022": {
-        "assets": [],
-        "portfolios": ["LOUIS.PF"],
-        "start_date": "2022-01-01",
-        "end_date": "2022-12-31"
-    },
-    "market vs my pf since 2020-01-01": {
-        "assets": ["MARKET"],
-        "portfolios": ["CEDRIC.PF"],
-        "start_date": "2020-01-01",
-        "end_date": "2026-04-08"
-    }
+  "My portfolio performance YTD": {
+    "assets": [],
+    "portfolios": ["CEDRIC.PF"],
+    "start_date": "2026-01-01",
+    "end_date": "2026-04-08"
+  },
+  "How did snowflake do in 2024?": {
+    "assets": ["SNOWFLAKE"],
+    "portfolios": [],
+    "start_date": "2024-01-01",
+    "end_date": "2024-12-31"
+  },
+  "How is my portfolio holding up compared to the SP500 this year ?": {
+    "assets": ["SP500"],
+    "portfolios": ["CEDRIC.PF"],
+    "start_date": "2026-01-01",
+    "end_date": "2026-04-08"
+  },
+  "What has AAPL been doing recently?": {
+    "assets": ["AAPL"],
+    "portfolios": [],
+    "start_date": "",
+    "end_date": ""
+  },
+  "Compare Louis' pf to the market since 2026-02-01": {
+    "assets": ["MARKET"],
+    "portfolios": ["LOUIS.PF"],
+    "start_date": "2026-02-01",
+    "end_date": "2026-04-08"
+  },
+  "How did Apple and microSoft do last year?": {
+    "assets": ["APPLE", "MICROSOFT"],
+    "portfolios": [],
+    "start_date": "2025-01-01",
+    "end_date": "2025-12-31"
+  },
+  "Performance of John's portfolio yesterday": {
+    "assets": [],
+    "portfolios": ["JOHN.PF"],
+    "start_date": "2026-04-07",
+    "end_date": "2026-04-07"
+  },
+  "Did tesla beat john pf and louis.pf in 2023?": {
+    "assets": ["TESLA"],
+    "portfolios": ["JOHN.PF", "LOUIS.PF"],
+    "start_date": "2023-01-01",
+    "end_date": "2023-12-31"
+  },
+  "What is the market looking like lately?": {
+    "assets": ["MARKET"],
+    "portfolios": [],
+    "start_date": "",
+    "end_date": ""
+  },
+  "Compare my pf to Nasdaq and Russell 2000": {
+    "assets": ["NASDAQ", "RUSSELL 2000"],
+    "portfolios": ["CEDRIC.PF"],
+    "start_date": "",
+    "end_date": ""
+  },
+  "NVDA price on 2025-11-15": {
+    "assets": ["NVDA"],
+    "portfolios": [],
+    "start_date": "2025-11-15",
+    "end_date": "2025-11-15"
+  },
+  "how did the market do since 2025-12-01?": {
+    "assets": ["MARKET"],
+    "portfolios": [],
+    "start_date": "2025-12-01",
+    "end_date": "2026-04-08"
+  },
+  "bitcoin and ethereum ytd": {
+    "assets": ["BITCOIN", "ETHEREUM"],
+    "portfolios": [],
+    "start_date": "2026-01-01",
+    "end_date": "2026-04-08"
+  },
+  "my portfolio last year": {
+    "assets": [],
+    "portfolios": ["CEDRIC.PF"],
+    "start_date": "2025-01-01",
+    "end_date": "2025-12-31"
+  },
+  "Did GOOGL go up?": {
+    "assets": ["GOOGL"],
+    "portfolios": [],
+    "start_date": "",
+    "end_date": ""
+  },
+  "John pf versus CEDRIC.PF this year": {
+    "assets": [],
+    "portfolios": ["JOHN.PF", "CEDRIC.PF"],
+    "start_date": "2026-01-01",
+    "end_date": "2026-04-08"
+  },
+  "What did AMZN close at yesterday": {
+    "assets": ["AMZN"],
+    "portfolios": [],
+    "start_date": "2026-04-07",
+    "end_date": "2026-04-07"
+  },
+  "meta and Nflx since 2026-01-15": {
+    "assets": ["META", "NFLX"],
+    "portfolios": [],
+    "start_date": "2026-01-15",
+    "end_date": "2026-04-08"
+  },
+  "how did Louis's pf perform in 2022": {
+    "assets": [],
+    "portfolios": ["LOUIS.PF"],
+    "start_date": "2022-01-01",
+    "end_date": "2022-12-31"
+  },
+  "market vs my pf since 2020-01-01": {
+    "assets": ["MARKET"],
+    "portfolios": ["CEDRIC.PF"],
+    "start_date": "2020-01-01",
+    "end_date": "2026-04-08"
+  }
 }

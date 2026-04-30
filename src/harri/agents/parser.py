@@ -2,17 +2,20 @@
 # ========================== IMPORTS AND CONSTANTS ============================
 # -----------------------------------------------------------------------------
 # First Party Imports
-from dataclasses import dataclass
 import datetime as dt
-from pathlib import Path
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+
+from jinja2 import Template
+
 # Third Party Imports
 from pydantic import BaseModel, Field
-from pydantic_ai import Agent, RunContext, ModelRetry
-from pydantic_ai.settings import ModelSettings
+from pydantic_ai import Agent, ModelRetry, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
-from jinja2 import Template
+from pydantic_ai.settings import ModelSettings
+
 # Constants
 FILE_DIR = Path(__file__).parent
 # Setup logger
@@ -22,16 +25,18 @@ logger = logging.getLogger(__name__)
 # -----------------------------------------------------------------------------
 # =============================== AGENT SETUP =================================
 # -----------------------------------------------------------------------------
+
+
 # Works with env var `OPENAI_API_KEY` by default
 provider = OpenAIProvider()
-model = OpenAIChatModel('gpt-5.4-nano', provider=provider)
+model = OpenAIChatModel("gpt-5.4-nano", provider=provider)
 
 
 @dataclass
 class ParseDeps:
     user: str
     possible_portfolios: list[str]
-    current_date: str = dt.date.today().strftime('%Y-%m-%d')
+    current_date: str = dt.date.today().strftime("%Y-%m-%d")
 
 
 class ParsedOutput(BaseModel):
@@ -39,16 +44,10 @@ class ParsedOutput(BaseModel):
         description="List unmodified asset name(s) mentioned in user query."
     )
     portfolios: list[str] = Field(
-        description=(
-            "List portfolios mentioned in user query."
-        )
+        description=("List portfolios mentioned in user query.")
     )
-    start_date: str = Field(
-        description="Start date for the requested time range."
-    )
-    end_date: str = Field(
-        description="End date for the requested time range."
-    )
+    start_date: str = Field(description="Start date for the requested time range.")
+    end_date: str = Field(description="End date for the requested time range.")
 
 
 parser_agent = Agent(
@@ -66,29 +65,26 @@ parser_agent = Agent(
 # System prompt
 @parser_agent.system_prompt
 def build_prompt(ctx: RunContext[ParseDeps]) -> str:
-    prompt_text = (FILE_DIR / 'parser.md').read_text()
-    today = dt.datetime.strptime(ctx.deps.current_date, '%Y-%m-%d').date()
+    prompt_text = (FILE_DIR / "parser.md").read_text()
+    today = dt.datetime.strptime(ctx.deps.current_date, "%Y-%m-%d").date()
 
     vars = {
-        'today': today.strftime('%Y-%m-%d'),
-        'year': today.year,
-        'yesterday': (today - dt.timedelta(days=1)).strftime('%Y-%m-%d'),
-        'user': ctx.deps.user.upper(),
-        'possible_portfolios': ctx.deps.possible_portfolios,
+        "today": today.strftime("%Y-%m-%d"),
+        "year": today.year,
+        "yesterday": (today - dt.timedelta(days=1)).strftime("%Y-%m-%d"),
+        "user": ctx.deps.user.upper(),
+        "possible_portfolios": ctx.deps.possible_portfolios,
     }
 
     prompt = Template(prompt_text).render(**vars)
-    logger.debug('System prompt built: %s', prompt)
+    logger.debug("System prompt built: %s", prompt)
 
     return prompt
 
 
 # Ouptut validation can catch errors and trigger a retry with a helpful message
 @parser_agent.output_validator
-def validate_output(
-    ctx: RunContext[ParseDeps],
-    output: ParsedOutput
-) -> ParsedOutput:
+def validate_output(ctx: RunContext[ParseDeps], output: ParsedOutput) -> ParsedOutput:
     errors = []
 
     # Uppercase all assets and portfolios
@@ -96,7 +92,7 @@ def validate_output(
     output.portfolios = [pf.upper() for pf in (output.portfolios or [])]
 
     # Validate that portfolios mentioned in output are in possible_portfolios
-    for pf in (output.portfolios or []):
+    for pf in output.portfolios or []:
         if pf not in ctx.deps.possible_portfolios:
             errors.append(
                 f"- Invalid portfolio mentioned: {pf}. Must be one of "
@@ -112,21 +108,20 @@ def validate_output(
 
     # Move any assets that are actually portfolio names
     # (common model error we can fix ourselves)
-    for asset in (output.assets or []):
+    for asset in output.assets or []:
         if asset in ctx.deps.possible_portfolios:
             output.assets.remove(asset)
             if asset not in (output.portfolios or []):
                 output.portfolios.append(asset)
             logger.warning(
-                f"Asset '{asset}' is a portfolio name. "
-                "Moved it to portfolios list."
+                f"Asset '{asset}' is a portfolio name. Moved it to portfolios list."
             )
 
     if errors:
         rerun_msg = (
-            "Output validation failed:\n" +
-            "\n".join(errors) +
-            "\nPlease correct the errors and try again."
+            "Output validation failed:\n"
+            + "\n".join(errors)
+            + "\nPlease correct the errors and try again."
         )
         logger.warning(rerun_msg)
         raise ModelRetry(rerun_msg)
@@ -134,16 +129,13 @@ def validate_output(
     return output
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Example usage for testing
     deps = ParseDeps(
-        user="Cedric",
-        possible_portfolios=["CEDRIC.PF", "JOHN.PF", "LOUIS.PF"]
+        user="Cedric", possible_portfolios=["CEDRIC.PF", "JOHN.PF", "LOUIS.PF"]
     )
     user_query = "What is my portofolio performance ffrom Jan 1 to Mar 31?"
     result = parser_agent.run_sync(
-        deps=deps,
-        user_prompt=user_query,
-        output_type=ParsedOutput
+        deps=deps, user_prompt=user_query, output_type=ParsedOutput
     )
     print(result.output)

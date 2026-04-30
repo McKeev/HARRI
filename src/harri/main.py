@@ -6,34 +6,35 @@ Telegram bot interfaces.
 # ========================== IMPORTS AND CONSTANTS ============================
 # -----------------------------------------------------------------------------
 
-
+import logging
 import os
 import sys
 from pathlib import Path
-import logging
-
 
 from dotenv import load_dotenv
+
+# Import colorlog if available, otherwise set to None
 try:
     import colorlog
-    log_color = True
 except ImportError:
-    log_color = False
+    colorlog = None
 
 from .agents import ParseDeps, parser_agent
 from .telebot import start_telebot
 
-FILE_DIR = Path(__file__).parent  # harri/src/harri 
+FILE_DIR = Path(__file__).parent  # harri/src/harri
 
 
 # -----------------------------------------------------------------------------
 # ================================= LOGGING ===================================
 # -----------------------------------------------------------------------------
+
+
 logger = logging.getLogger("harri")
 logger.setLevel("INFO")
 logger.propagate = False
 
-if log_color:
+if colorlog is not None:
     console_handler = colorlog.StreamHandler()
     console_handler.setFormatter(
         colorlog.ColoredFormatter(
@@ -51,9 +52,7 @@ if log_color:
 else:
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(
-        logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     )
 logger.addHandler(console_handler)
 
@@ -69,14 +68,11 @@ def run_cli():
     """
     user_prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else None
     deps = ParseDeps(
-        user='Cedric',
-        possible_portfolios=['LOUIS.PF', 'CEDRIC.PF', 'JOHN.PF'],
+        user="Cedric",
+        possible_portfolios=["LOUIS.PF", "CEDRIC.PF", "JOHN.PF"],
     )
 
-    result = parser_agent.run_sync(
-        deps=deps,
-        user_prompt=user_prompt
-    )
+    result = parser_agent.run_sync(deps=deps, user_prompt=user_prompt)
 
     return result.output
 
@@ -87,9 +83,9 @@ def run_telebot():
     """
     token = sys.argv[1] if len(sys.argv) > 1 else None
     if not token:
-        env_path = FILE_DIR.parent.parent / '.env'
+        env_path = FILE_DIR.parent.parent / ".env"
         load_dotenv(dotenv_path=env_path)
-        token = os.getenv('HARRI_BOT_TOKEN')
+        token = os.getenv("HARRI_BOT_TOKEN")
 
     if token:
         start_telebot(token)
@@ -103,6 +99,6 @@ def run_telebot():
 # -----------------------------------------------------------------------------
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Default to CLI
     run_cli()

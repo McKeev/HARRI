@@ -1,21 +1,21 @@
-from pathlib import Path
 import json
+from pathlib import Path
 
 import pytest
 
 from harri.agents import ParseDeps, ParsedOutput, parser_agent
 
 FILE_DIR = Path(__file__).parent
-GREEN = '\033[92m'
-RED = '\033[91m'
-ORANGE = '\033[93m'
-RESET = '\033[0m'
+GREEN = "\033[92m"
+RED = "\033[91m"
+ORANGE = "\033[93m"
+RESET = "\033[0m"
 
 
 def _build_diff(actual: ParsedOutput, expected: ParsedOutput) -> str:
     """
-    Reviews the parsed output and builds a custom colored diff string if
-    there are mismatches.
+    Reviews the parsed output and builds a custom colored diff string if there are
+    mismatches.
 
     Parameters:
     ----------
@@ -27,8 +27,8 @@ def _build_diff(actual: ParsedOutput, expected: ParsedOutput) -> str:
     Returns:
     -------
     str
-        A string representation of the diff, with matches in green and
-        mismatches in red.
+        A string representation of the diff, with matches in green and mismatches in
+        red.
     """
     # Convert models to dictionaries for easy iteration
     actual_dict = actual.model_dump()
@@ -57,9 +57,7 @@ def _build_diff(actual: ParsedOutput, expected: ParsedOutput) -> str:
 
 def _load_test_prompts() -> list[tuple[str, ParsedOutput]]:
     """Load `test_prompt: answer_key` pairs from test_prompts.json."""
-    prompts_parsed: dict = json.loads(
-        (FILE_DIR / 'test_prompts.json').read_text()
-    )
+    prompts_parsed: dict = json.loads((FILE_DIR / "test_prompts.json").read_text())
     return [(k, ParsedOutput(**v)) for k, v in prompts_parsed.items()]
 
 
@@ -67,14 +65,11 @@ def _load_test_prompts() -> list[tuple[str, ParsedOutput]]:
 def test_prompts(test_prompt: str, answer_key: ParsedOutput):
     # Important: test prompts should take into account these constraints:
     deps = ParseDeps(
-            user='Cedric',
-            possible_portfolios=['LOUIS.PF', 'CEDRIC.PF', 'JOHN.PF'],
-            current_date='2026-04-08'
-        )
+        user="Cedric",
+        possible_portfolios=["LOUIS.PF", "CEDRIC.PF", "JOHN.PF"],
+        current_date="2026-04-08",
+    )
 
-    result = parser_agent.run_sync(
-        deps=deps,
-        user_prompt=test_prompt
-    ).output
+    result = parser_agent.run_sync(deps=deps, user_prompt=test_prompt).output
 
     assert result == answer_key, _build_diff(result, answer_key)
