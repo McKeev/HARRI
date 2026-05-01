@@ -33,7 +33,8 @@ optional = [
     "colorlog (>=6.10.1,<7.0.0)"
 ]
 dev = [
-    "pytest (>=9.0.3,<10.0.0)"
+    "pytest (>=9.0.3,<10.0.0)",
+    "pytest-xdist (>=3.8.0,<4.0.0)",
 ]
 
 [tool.ruff]

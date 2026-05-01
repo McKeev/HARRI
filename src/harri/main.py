@@ -2,6 +2,7 @@
 Main entry point for the Harri application, providing both CLI and
 Telegram bot interfaces.
 """
+
 # -----------------------------------------------------------------------------
 # ========================== IMPORTS AND CONSTANTS ============================
 # -----------------------------------------------------------------------------
@@ -19,7 +20,7 @@ try:
 except ImportError:
     colorlog = None
 
-from .agents import ParseDeps, parser_agent
+from .finance import ParseDeps, parser_agent
 from .telebot import start_telebot
 
 FILE_DIR = Path(__file__).parent  # harri/src/harri

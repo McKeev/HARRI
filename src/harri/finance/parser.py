@@ -64,7 +64,7 @@ parser_agent = Agent(
 
 # System prompt
 @parser_agent.system_prompt
-def build_prompt(ctx: RunContext[ParseDeps]) -> str:
+async def build_prompt(ctx: RunContext[ParseDeps]) -> str:
     prompt_text = (FILE_DIR / "parser.md").read_text()
     today = dt.datetime.strptime(ctx.deps.current_date, "%Y-%m-%d").date()
 
@@ -84,7 +84,10 @@ def build_prompt(ctx: RunContext[ParseDeps]) -> str:
 
 # Ouptut validation can catch errors and trigger a retry with a helpful message
 @parser_agent.output_validator
-def validate_output(ctx: RunContext[ParseDeps], output: ParsedOutput) -> ParsedOutput:
+async def validate_output(
+    ctx: RunContext[ParseDeps],
+    output: ParsedOutput,
+) -> ParsedOutput:
     errors = []
 
     # Uppercase all assets and portfolios
