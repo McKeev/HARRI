@@ -33,3 +33,17 @@ Tasks are delegated to highly specialized, stateless sub-agents (e.g., Finance A
 - **Long-Term Memory (Facts/Preferences):** Managed through a database (e.g., SQLite/JSON) via two methods:
   - *Passive Memory:* Injecting core facts (user name, location, current projects) into H.A.R.R.I's system prompt dynamically using `RunContext` dependencies.
   - *Active Memory:* Providing H.A.R.R.I with specific tools (e.g., `save_fact`, `search_memory`) to let it dynamically write and read user preferences.
+
+## Data Management
+
+- I need a table that stores user info for quick access:
+  - user_ID
+  - telegram_id
+  - name
+  - approval_status
+  - admin_status
+- Per user, I also need to store:
+  - conversation history (message history with timestamps)
+  - long term memory
+  - google auth tokens
+  - LLM usage data (for cost tracking)

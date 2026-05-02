@@ -7,6 +7,7 @@ Telegram bot interfaces.
 # ========================== IMPORTS AND CONSTANTS ============================
 # -----------------------------------------------------------------------------
 
+import asyncio
 import logging
 import os
 import sys
@@ -67,15 +68,23 @@ def run_cli():
     """
     Runs the parser agent with a user prompt taken from command line arguments.
     """
-    user_prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else None
-    deps = ParseDeps(
-        user="Cedric",
-        possible_portfolios=["LOUIS.PF", "CEDRIC.PF", "JOHN.PF"],
-    )
 
-    result = parser_agent.run_sync(deps=deps, user_prompt=user_prompt)
+    async def inner():
+        user_prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else None
+        deps = ParseDeps(
+            user="Cedric",
+            possible_portfolios=["LOUIS.PF", "CEDRIC.PF", "JOHN.PF"],
+        )
 
-    return result.output
+        result = await parser_agent.run(deps=deps, user_prompt=user_prompt)
+
+        return result.output
+
+    try:
+        return asyncio.run(inner())
+    except Exception as e:
+        logger.error(f"An error occurred while running the CLI: {e}")
+        sys.exit(1)
 
 
 def run_telebot():
