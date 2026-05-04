@@ -36,14 +36,20 @@ Tasks are delegated to highly specialized, stateless sub-agents (e.g., Finance A
 
 ## Data Management
 
-- I need a table that stores user info for quick access:
-  - user_ID
-  - telegram_id
-  - name
-  - approval_status
-  - admin_status
-- Per user, I also need to store:
-  - conversation history (message history with timestamps)
-  - long term memory
-  - google auth tokens
-  - LLM usage data (for cost tracking)
+Data is stored in a SQL database (SQLite for simplicity).
+The main table is `users` which is associated with the `User` class.
+```python
+class User(BaseModel):
+    id: int
+    telegram_id: int
+    name: str = "User"
+    approval_status: bool = False
+    admin_status: bool = False
+```
+
+For authentication, there is also a oauth_credentials table that stores the credentials for the various APIs that H.A.R.R.I will use to perform its tasks.
+The tokens are encrypted using the `cryptography` library to ensure security.
+Use the following command to view the database:
+```bash
+harlequin path/to/database.db
+```

@@ -1,6 +1,8 @@
 # Project specific
 .logfire
 secrets/
+temp*
+sandbox*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

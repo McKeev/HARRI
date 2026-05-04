@@ -3,9 +3,9 @@
 # --------------------------------------------------------------------------------------
 from __future__ import annotations
 
-import logging
-
 # Standard Library Imports
+import json
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -13,8 +13,8 @@ from pathlib import Path
 import aiosqlite
 from pydantic import BaseModel
 
-# Constants
-from harri.utils import PROD_DB
+# Local Imports
+from harri.utils import PROD_DB, decrypt_blob, encrypt_blob
 
 # Setup
 _active_db_path: Path | None = None
@@ -65,8 +65,9 @@ async def load_db(db_path: Path | str | None = None):
     _active_db_path = Path(db_path)
     # Establish connection and create table
     async with get_cursor() as cursor:
-        # language=sql
-        await cursor.execute("""
+        await cursor.executescript(
+            # sql
+            """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             telegram_id INTEGER UNIQUE NOT NULL,
@@ -74,7 +75,15 @@ async def load_db(db_path: Path | str | None = None):
             approval_status BOOLEAN DEFAULT 0,
             admin_status BOOLEAN DEFAULT 0
         );
-        """)
+        CREATE TABLE IF NOT EXISTS oauth_credentials (
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            provider TEXT NOT NULL,
+            encrypted_payload TEXT NOT NULL,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, provider)
+        );
+        """
+        )
         await cursor.execute("PRAGMA journal_mode=WAL;")
         logger.info(f"Database loaded from: {str(_active_db_path)}")
 
@@ -182,3 +191,61 @@ class User(BaseModel):
                 raise ValueError(f"User with telegram_id {telegram_id} already exists.")
 
             return cls(**dict(new_user_info))
+
+    async def get_credentials(self, provider: str) -> dict | None:
+        """
+        Retrieves the encrypted credentials for a given provider.
+
+        Parameters:
+        ----------
+        provider: str
+            The name of the service provider (e.g., "google").
+
+        Returns:
+        -------
+        dict | None
+            The decrypted credentials as a dict if found, else None.
+        """
+        async with get_cursor() as cursor:
+            await cursor.execute(
+                # sql
+                """
+                SELECT encrypted_payload FROM oauth_credentials
+                WHERE user_id = ? AND provider = ?;
+                """,
+                (self.id, provider),
+            )
+            result = await cursor.fetchone()
+
+        if result is None:
+            return None
+
+        plaintext_credentials = decrypt_blob(result["encrypted_payload"])
+        return json.loads(plaintext_credentials)
+
+    async def store_credentials(self, provider: str, token: dict):
+        """
+        Encrypts and stores the credentials for a given provider.
+        Conflict behaviour: overwrite existing credentials for the same provider.
+
+        Parameters:
+        ----------
+        provider: str
+            The name of the service provider (e.g., "google").
+        token: dict
+            The credentials to be encrypted and stored.
+        """
+        plaintext_credentials = json.dumps(token)
+        encrypted = encrypt_blob(plaintext_credentials)
+        async with get_cursor() as cursor:
+            await cursor.execute(
+                # sql
+                """
+                INSERT INTO oauth_credentials (user_id, provider, encrypted_payload)
+                VALUES (?, ?, ?)
+                ON CONFLICT(user_id, provider) DO UPDATE SET
+                    encrypted_payload = excluded.encrypted_payload,
+                    updated_at = CURRENT_TIMESTAMP;
+                """,
+                (self.id, provider, encrypted),
+            )
