@@ -3,7 +3,7 @@ import asyncio
 import pytest
 import pytest_asyncio
 
-from harri.database import User, load_db
+from harri.memory import User, UserConflictError, load_db
 
 # --------------------------------------------------------------------------------------
 # FIXTURES
@@ -42,10 +42,10 @@ async def test_register_new_user():
 
 @pytest.mark.asyncio
 async def test_register_duplicate_user_raises_error():
-    """Test that registering the same telegram_id twice raises a ValueError."""
+    """Test that registering the same telegram_id twice raises a UserConflictError."""
     await User.register(telegram_id=11111, name="Original")
 
-    with pytest.raises(ValueError, match="already exists"):
+    with pytest.raises(UserConflictError, match="already exists"):
         await User.register(telegram_id=11111, name="Imposter")
 
 

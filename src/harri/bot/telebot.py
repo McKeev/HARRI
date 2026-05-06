@@ -17,7 +17,7 @@ from telegram.ext import (
 )
 
 # Local Imports
-from harri.database import User, UserConflictError
+from harri.memory import User, UserConflictError
 
 logger = logging.getLogger(__name__)
 

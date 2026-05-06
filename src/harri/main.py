@@ -21,9 +21,9 @@ try:
 except ImportError:
     colorlog = None
 
-from .database import load_db
+from .bot import start_telebot
 from .finance import ParseDeps, parser_agent
-from .telebot import start_telebot
+from .memory import load_db
 
 FILE_DIR = Path(__file__).parent  # harri/src/harri
 

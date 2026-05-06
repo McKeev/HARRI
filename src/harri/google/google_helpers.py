@@ -12,7 +12,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 # Local Imports
-from harri.database import User
+from harri.memory import User
 from harri.utils import GOOGLE_CREDS
 
 # --------------------------------------------------------------------------------------
