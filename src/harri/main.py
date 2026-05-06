@@ -21,6 +21,7 @@ try:
 except ImportError:
     colorlog = None
 
+from .database import load_db
 from .finance import ParseDeps, parser_agent
 from .telebot import start_telebot
 
@@ -97,10 +98,21 @@ def run_telebot():
         load_dotenv(dotenv_path=env_path)
         token = os.getenv("HARRI_BOT_TOKEN")
 
-    if token:
+    if not token or not isinstance(token, str):
+        logger.error(
+            "Telegram bot token not provided. "
+            "Please set HARRI_BOT_TOKEN in .env or pass it as an argument."
+        )
+        sys.exit(1)
+
+    async def inner():
+        await load_db()
+
+    try:
+        asyncio.run(inner())
         start_telebot(token)
-    else:
-        print("Error: No Telegram bot token provided.")
+    except Exception as e:
+        logger.error(f"An error occurred while starting the Telegram bot: {e}")
         sys.exit(1)
 
 

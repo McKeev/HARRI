@@ -11,7 +11,7 @@ from pathlib import Path
 
 # Third Party Imports
 import aiosqlite
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # Local Imports
 from harri.utils import PROD_DB, decrypt_blob, encrypt_blob
@@ -19,6 +19,15 @@ from harri.utils import PROD_DB, decrypt_blob, encrypt_blob
 # Setup
 _active_db_path: Path | None = None
 logger = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------------------
+# EXCEPTIONS
+# --------------------------------------------------------------------------------------
+
+
+class UserConflictError(Exception):
+    """Raised when a user registration conflict occurs."""
 
 
 # --------------------------------------------------------------------------------------
@@ -35,6 +44,8 @@ async def get_conn():
     if _active_db_path is None:
         raise RuntimeError("Database path not set. Ensure `load_db` is called.")
     async with aiosqlite.connect(_active_db_path) as conn:
+        # Enable foreign key support (required for ON DELETE CASCADE in SQLite)
+        await conn.execute("PRAGMA foreign_keys = ON;")
         # Allows rows to be accessed like dicts
         conn.row_factory = aiosqlite.Row
         try:
@@ -76,7 +87,7 @@ async def load_db(db_path: Path | str | None = None):
             admin_status BOOLEAN DEFAULT 0
         );
         CREATE TABLE IF NOT EXISTS oauth_credentials (
-            user_id INTEGER NOT NULL REFERENCES users(id),
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             provider TEXT NOT NULL,
             encrypted_payload TEXT NOT NULL,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -112,8 +123,8 @@ class User(BaseModel):
         Indicates if the user has admin privileges (default: False).
     """
 
-    id: int
-    telegram_id: int
+    id: int = Field(frozen=True)
+    telegram_id: int = Field(frozen=True)
     name: str = "User"
     approval_status: bool = False
     admin_status: bool = False
@@ -162,7 +173,35 @@ class User(BaseModel):
         name: str = "User",
         approval_status: bool = False,
         admin_status: bool = False,
-    ):
+    ) -> User:
+        """
+        Registers a new user in the database. If a user with the same telegram_id
+        already exists, raises a UserConflictError.
+
+        Parameters:
+        ----------
+        telegram_id: int | str
+            The user's Telegram ID (must be unique).
+        name: str
+            The user's display name (default: "User").
+        approval_status: bool
+            Whether the user is approved (default: False).
+        admin_status: bool
+            Whether the user has admin privileges (default: False).
+
+        Returns:
+        -------
+        User
+            The newly registered User instance.
+
+        Raises:
+        ------
+        UserConflictError
+            If a user with the same telegram_id already exists in the database.
+        ValueError
+            If the provided telegram_id is not a valid integer or string representation
+            of an integer.
+        """
         if isinstance(telegram_id, str):
             try:
                 telegram_id = int(telegram_id)
@@ -188,8 +227,12 @@ class User(BaseModel):
 
             if new_user_info is None:
                 # Unexpected behaviour: user already exists
-                raise ValueError(f"User with telegram_id {telegram_id} already exists.")
-
+                raise UserConflictError(
+                    f"User with telegram_id {telegram_id} already exists."
+                )
+            logger.info(
+                f"New user registered with telegram_id {telegram_id} and name '{name}'."
+            )
             return cls(**dict(new_user_info))
 
     async def get_credentials(self, provider: str) -> dict | None:
@@ -249,3 +292,60 @@ class User(BaseModel):
                 """,
                 (self.id, provider, encrypted),
             )
+
+    async def info(self) -> str:
+        """Returns a well formatted string of the user's information."""
+        intro = "👤 User Info:\n"
+        return intro + "\n".join(
+            f"• {k.replace('_', ' ').title()}: {v}"
+            for k, v in self.model_dump().items()
+        )
+
+    async def delete(self) -> None:
+        """
+        Deletes the user from the database.
+        WARNING: This action is irreversible and will remove all associated data,
+        including credentials.
+        """
+        async with get_cursor() as cursor:
+            await cursor.execute(
+                "DELETE FROM users WHERE id = ?;",
+                (self.id,),
+            )
+            # Check if the user was actually deleted (should be 1)
+            if cursor.rowcount == 0:
+                logger.warning(
+                    f"Attempted to delete user with id {self.id}, "
+                    "but no rows were affected. "
+                    "This may indicate the user was already deleted or never existed."
+                )
+            logger.info(f"User with id {self.id} deleted from database.")
+
+    async def save(self) -> User | None:
+        """
+        Saves the current attributes of the User instance to the database.
+        Use this after modifying the user's attributes.
+        """
+        async with get_cursor() as cursor:
+            await cursor.execute(
+                # sql
+                """
+                UPDATE users
+                SET name = ?,
+                    approval_status = ?,
+                    admin_status = ?
+                WHERE id = ?;
+                """,
+                (self.name, self.approval_status, self.admin_status, self.id),
+            )
+            # check if the user was actually updated (should be 1)
+            if cursor.rowcount == 0:
+                logger.warning(
+                    f"Attempted to update user with id {self.id}, "
+                    "but no rows were affected. Check if user exists in the database."
+                )
+                return None
+            logger.info(
+                f"User with id {self.id} updated in database: {self.model_dump()}"
+            )
+            return self
