@@ -78,6 +78,7 @@ async def help_command(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         "/help  - show this message\n"
         "/userinfo - show your registered info\n"
         "/setname <new_name> - change your registered name\n"
+        "/link_portfolio <portfolio_ticker> - link a portfolio to your account)\n"
         "/delete_account - delete your account and all data\n"
         "\nOr just send any text to chat with H.A.R.R.I (Not implemented yet)."
     )
@@ -119,6 +120,38 @@ async def setname(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if await user.save():
         await update.message.reply_text(
             f"Your name has been updated to `{new_name}`.", parse_mode="Markdown"
+        )
+    else:
+        # Should not happen!
+        raise RuntimeError("Undefined error occurred while saving user name change.")
+
+
+async def link_portfolio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle /link_portfolio <portfolio_ticker>."""
+    # Type guard
+    if update.message is None or update.effective_user is None or context.args is None:
+        return
+
+    if context.args is None or len(context.args) != 1:
+        await update.message.reply_text(
+            "Please provide exactly one portfolio ticker after /link_portfolio."
+        )
+        return
+
+    ticker = context.args[0].strip().upper()
+
+    user = await User.from_tele_id(update.effective_user.id)
+    if user is None:
+        await update.message.reply_text(
+            "You are not registered yet. Use /start to register."
+        )
+        return
+
+    user.portfolio = ticker
+    if await user.save():
+        await update.message.reply_text(
+            f"Your associated portfolio has been updated to `{ticker}`.",
+            parse_mode="Markdown",
         )
     else:
         # Should not happen!
@@ -269,6 +302,7 @@ def start_telebot(bot_token: str) -> None:
     app.add_handler(CommandHandler("userinfo", userinfo))
     app.add_handler(CommandHandler("setname", setname))
     app.add_handler(CommandHandler("delete_account", delete_account))
+    app.add_handler(CommandHandler("link_portfolio", link_portfolio))
 
     # Messages
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))

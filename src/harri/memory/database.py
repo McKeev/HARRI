@@ -84,7 +84,8 @@ async def load_db(db_path: Path | str | None = None):
             telegram_id INTEGER UNIQUE NOT NULL,
             name TEXT,
             approval_status BOOLEAN DEFAULT 0,
-            admin_status BOOLEAN DEFAULT 0
+            admin_status BOOLEAN DEFAULT 0,
+            portfolio TEXT
         );
         CREATE TABLE IF NOT EXISTS oauth_credentials (
             user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -121,6 +122,8 @@ class User(BaseModel):
         Indicates if the user is approved (default: False).
     admin_status: bool
         Indicates if the user has admin privileges (default: False).
+    portfolio: str | None
+        Optional field for user's portfolio information (default: None).
     """
 
     id: int = Field(frozen=True)
@@ -128,6 +131,7 @@ class User(BaseModel):
     name: str = "User"
     approval_status: bool = False
     admin_status: bool = False
+    portfolio: str | None = None
 
     @classmethod
     async def from_tele_id(cls, telegram_id: int | str) -> User | None:
@@ -173,6 +177,7 @@ class User(BaseModel):
         name: str = "User",
         approval_status: bool = False,
         admin_status: bool = False,
+        portfolio: str | None = None,
     ) -> User:
         """
         Registers a new user in the database. If a user with the same telegram_id
@@ -188,6 +193,8 @@ class User(BaseModel):
             Whether the user is approved (default: False).
         admin_status: bool
             Whether the user has admin privileges (default: False).
+        portfolio: str | None
+            Optional field for user's portfolio information (default: None).
 
         Returns:
         -------
@@ -216,12 +223,12 @@ class User(BaseModel):
             await cursor.execute(
                 # sql
                 """
-                INSERT INTO users (telegram_id, name, approval_status, admin_status)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO users (telegram_id, name, approval_status, admin_status, portfolio)
+                VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT(telegram_id) DO NOTHING
                 RETURNING *;
                 """,
-                (telegram_id, name, approval_status, admin_status),
+                (telegram_id, name, approval_status, admin_status, portfolio),
             )
             new_user_info = await cursor.fetchone()
 
@@ -333,10 +340,17 @@ class User(BaseModel):
                 UPDATE users
                 SET name = ?,
                     approval_status = ?,
-                    admin_status = ?
+                    admin_status = ?,
+                    portfolio = ?
                 WHERE id = ?;
                 """,
-                (self.name, self.approval_status, self.admin_status, self.id),
+                (
+                    self.name,
+                    self.approval_status,
+                    self.admin_status,
+                    self.portfolio,
+                    self.id,
+                ),
             )
             # check if the user was actually updated (should be 1)
             if cursor.rowcount == 0:

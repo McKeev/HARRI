@@ -45,6 +45,7 @@ class User(BaseModel):
     name: str = "User"
     approval_status: bool = False
     admin_status: bool = False
+    portfolio: str | None = None
 ```
 
 For authentication, there is also a oauth_credentials table that stores the credentials for the various APIs that H.A.R.R.I will use to perform its tasks.
