@@ -6,6 +6,7 @@ import logging
 import time
 
 # Third Party Imports
+import fin_db as fdb
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     Application,
@@ -17,7 +18,8 @@ from telegram.ext import (
 )
 
 # Local Imports
-from harri.memory import User, UserConflictError
+from harri.finance import possible_portfolios
+from harri.memory import User, UserConflictError, load_db
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +146,14 @@ async def link_portfolio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if user is None:
         await update.message.reply_text(
             "You are not registered yet. Use /start to register."
+        )
+        return
+
+    if ticker not in await possible_portfolios():
+        await update.message.reply_text(
+            f"Ticker `{ticker}` is not a valid portfolio. "
+            "Please check the ticker and try again.",
+            parse_mode="Markdown",
         )
         return
 
@@ -293,31 +303,35 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 def start_telebot(bot_token: str) -> None:
-    logger.info("Starting bot with token: %s", bot_token[:4] + "****")
-    app = Application.builder().token(bot_token).build()
+    async def on_startup(app: Application) -> None:
+        await load_db()
+        await fdb.open_pool(user="fin_db_read")
 
-    # Commands userinfo
+    async def on_shutdown(app: Application) -> None:
+        await fdb.close_pool()
+
+    app = (
+        Application.builder()
+        .token(bot_token)
+        .post_init(on_startup)
+        .post_shutdown(on_shutdown)
+        .build()
+    )
+
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("userinfo", userinfo))
     app.add_handler(CommandHandler("setname", setname))
     app.add_handler(CommandHandler("delete_account", delete_account))
     app.add_handler(CommandHandler("link_portfolio", link_portfolio))
-
-    # Messages
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-
-    # Inline keyboard callbacks
     app.add_handler(
         CallbackQueryHandler(
-            delete_account_callback,
-            pattern="^(confirm_delete|cancel_delete)$",
+            delete_account_callback, pattern="^(confirm_delete|cancel_delete)$"
         )
     )
     app.add_handler(CallbackQueryHandler(handle_callback))
-
-    # Errors
     app.add_error_handler(error_handler)
 
     logger.info("Bot started and polling for updates")

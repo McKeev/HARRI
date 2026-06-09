@@ -23,7 +23,6 @@ except ImportError:
 
 from .bot import start_telebot
 from .finance import ParseDeps, parser_agent
-from .memory import load_db
 
 FILE_DIR = Path(__file__).parent  # harri/src/harri
 
@@ -89,30 +88,19 @@ def run_cli():
 
 
 def run_telebot():
-    """
-    Starts the Telegram bot.
-    """
     token = sys.argv[1] if len(sys.argv) > 1 else None
     if not token:
         env_path = FILE_DIR.parent.parent / ".env"
         load_dotenv(dotenv_path=env_path)
         token = os.getenv("HARRI_BOT_TOKEN")
-
     if not token or not isinstance(token, str):
-        logger.error(
-            "Telegram bot token not provided. "
-            "Please set HARRI_BOT_TOKEN in .env or pass it as an argument."
-        )
+        logger.error("Telegram bot token not provided.")
         sys.exit(1)
 
-    async def inner():
-        await load_db()
-
     try:
-        asyncio.run(inner())
         start_telebot(token)
     except Exception as e:
-        logger.error(f"An error occurred while starting the Telegram bot: {e}")
+        logger.error(f"An error occurred: {e}")
         sys.exit(1)
 
 
