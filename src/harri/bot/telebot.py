@@ -18,7 +18,7 @@ from telegram.ext import (
 )
 
 # Local Imports
-from harri.finance import possible_portfolios
+from harri.finance import finance_query, possible_portfolios
 from harri.memory import User, UserConflictError, load_db
 
 logger = logging.getLogger(__name__)
@@ -250,14 +250,41 @@ async def delete_account_callback(
 async def handle_text(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle plain text messages."""
     # Type guard
-    if update.message is None:
+    if update.message is None or update.effective_user is None:
+        return
+
+    # Check if user is approved
+    user = await User.from_tele_id(update.effective_user.id)
+    if user is None:
+        await update.message.reply_text(
+            "You are not registered yet. Use /start to register."
+        )
+        return
+    elif user.approval_status is False:
+        await update.message.reply_text(
+            "Your account is pending approval. "
+            "Please wait for an admin to approve your account."
+        )
         return
 
     text = update.message.text
+    if not isinstance(text, str):
+        return
     logger.info('Received: "%s"', text)
 
-    # TODO: add logic here
-    await update.message.reply_text(f"You said: {text}")
+    # DEV PHASE: Straight to finance agent
+    await update.message.reply_text("DEV PHASE: Straight to finance agent")
+    response = await finance_query(text, user=user)
+
+    if isinstance(response, dict) and "error" in response:
+        await update.message.reply_text(
+            f"Error processing your query: {response['error']}\n\n"
+            f"{response.get('prose', '')}"
+        )
+    else:
+        await update.message.reply_text(
+            f"Here is the response to your query:\n{response}"
+        )
 
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

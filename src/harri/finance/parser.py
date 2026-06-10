@@ -77,7 +77,6 @@ async def build_prompt(ctx: RunContext[ParseDeps]) -> str:
     }
 
     prompt = Template(prompt_text).render(**vars)
-    logger.debug("System prompt built: %s", prompt)
 
     return prompt
 
