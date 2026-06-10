@@ -67,29 +67,6 @@ async def test_from_tele_id_returns_none_if_missing():
 
 
 @pytest.mark.asyncio
-async def test_string_integer_parsing():
-    """Test that string integers are correctly parsed into ints."""
-    # Register with a string
-    user = await User.register(telegram_id="555", name="StringUser")
-    assert user.telegram_id == 555
-
-    # Fetch with a string
-    fetched = await User.from_tele_id(telegram_id="555")
-    assert fetched is not None
-    assert fetched.id == user.id
-
-
-@pytest.mark.asyncio
-async def test_invalid_telegram_id_raises_error():
-    """Test that passing non-numeric strings crashes the factories safely."""
-    with pytest.raises(ValueError, match="Invalid telegram_id"):
-        await User.register(telegram_id="not_a_number")
-
-    with pytest.raises(ValueError, match="Invalid telegram_id"):
-        await User.from_tele_id(telegram_id="not_a_number")
-
-
-@pytest.mark.asyncio
 async def test_concurrent_reads_and_writes():
     """
     Test that WAL mode allows dozens of users to read the database

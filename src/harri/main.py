@@ -33,7 +33,7 @@ FILE_DIR = Path(__file__).parent  # harri/src/harri
 
 
 logger = logging.getLogger("harri")
-logger.setLevel("INFO")
+logger.setLevel("DEBUG")
 logger.propagate = False
 
 if colorlog is not None:

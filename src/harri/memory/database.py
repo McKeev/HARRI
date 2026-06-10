@@ -11,6 +11,7 @@ from pathlib import Path
 
 # Third Party Imports
 import aiosqlite
+from async_lru import alru_cache
 from pydantic import BaseModel, Field
 
 # Local Imports
@@ -103,6 +104,22 @@ async def load_db(db_path: Path | str | None = None):
 # --------------------------------------------------------------------------------------
 # USER MODEL
 # --------------------------------------------------------------------------------------
+# RULE: When creating/updating functions that write to the db, ensure they clear
+# the relevent cache (e.g. _user_lookup) to prevent stale data issues:
+# `User.clear_cache()` exists for this purpose!!
+
+
+@alru_cache(ttl=3600)
+async def _user_lookup(telegram_id: int):
+    logger.debug(f"Cache MISS: Fetching user {telegram_id} from the database...")
+    async with get_cursor() as cursor:
+        await cursor.execute(
+            # sql
+            "SELECT * FROM users WHERE telegram_id = ?",
+            (telegram_id,),
+        )
+        user_info = await cursor.fetchone()
+        return user_info
 
 
 class User(BaseModel):
@@ -134,7 +151,7 @@ class User(BaseModel):
     portfolio: str | None = None
 
     @classmethod
-    async def from_tele_id(cls, telegram_id: int | str) -> User | None:
+    async def from_tele_id(cls, telegram_id: int) -> User | None:
         """
         User factory from telegram id.
 
@@ -148,27 +165,8 @@ class User(BaseModel):
         User | None
             A User instance if found, else None.
         """
-        if isinstance(telegram_id, str):
-            try:
-                telegram_id = int(telegram_id)
-            except Exception:
-                raise ValueError(
-                    f"Invalid telegram_id: {telegram_id}. "
-                    "Must be an integer or string representing an integer."
-                )
-
-        async with get_cursor() as cursor:
-            await cursor.execute(
-                # sql
-                "SELECT * FROM users WHERE telegram_id = ?",
-                (telegram_id,),
-            )
-            user_info = await cursor.fetchone()
-
-            if user_info:
-                return cls(**dict(user_info))
-
-            return None
+        user_info = await _user_lookup(telegram_id)
+        return cls(**dict(user_info)) if user_info else None
 
     @classmethod
     async def register(
@@ -240,6 +238,7 @@ class User(BaseModel):
             logger.info(
                 f"New user registered with telegram_id {telegram_id} and name '{name}'."
             )
+            _user_lookup.cache_invalidate(telegram_id)
             return cls(**dict(new_user_info))
 
     async def get_credentials(self, provider: str) -> dict | None:
@@ -316,6 +315,7 @@ class User(BaseModel):
         """
         async with get_cursor() as cursor:
             await cursor.execute(
+                # sql
                 "DELETE FROM users WHERE id = ?;",
                 (self.id,),
             )
@@ -327,6 +327,7 @@ class User(BaseModel):
                     "This may indicate the user was already deleted or never existed."
                 )
             logger.info(f"User with id {self.id} deleted from database.")
+            self._clear_cache()
 
     async def save(self) -> User | None:
         """
@@ -362,4 +363,9 @@ class User(BaseModel):
             logger.info(
                 f"User with id {self.id} updated in database: {self.model_dump()}"
             )
+            self._clear_cache()
             return self
+
+    def _clear_cache(self):
+        """Clears the cache to prevent stale data issues after updates."""
+        _user_lookup.cache_invalidate(self.telegram_id)
